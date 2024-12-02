@@ -1,13 +1,13 @@
 import { ChangeEvent, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-interface RoomData {
+export interface RoomData {
   room_name: string;
   host_name: string;
   create_room_password: string;
 }
 
-interface JoinData {
+export interface JoinData {
   user_name: string;
   room_code: string;
   join_room_password: string;
@@ -65,13 +65,13 @@ function Home() {
 
   function handleCreateRoom() {
     if (createDataIsFilled) {
-      navigate("/room");
+      navigate("/room", {state: createRoomData});
     }
   }
 
   function handleJoinRoom() {
     if (joinDataIsFilled) {
-      navigate("/room");
+      navigate("/room", {state: joinData});
     }
   }
 
