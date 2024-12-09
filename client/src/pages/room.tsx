@@ -1,4 +1,4 @@
-import {useState, useEffect} from "react";
+import { ChangeEvent, useState, useEffect} from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { RoomData, JoinData } from "./home";
 import Player from "../other/youtube";
@@ -12,11 +12,23 @@ interface Video {
   url: string;
   thumbnail: string;
   title: string;
-  artist: string;
 }
 
 function Room({CurrentRoomData}: {CurrentRoomData: RoomData | JoinData}) {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+  const [searchData, setSearchData] = useState<string>("");
+  const [searchDataMobile, setSearchDataMobile] = useState<string>("");
+
+  function handleMobileSearchChange(e: ChangeEvent<HTMLInputElement>): void {
+    const { value } = e.target;
+    setSearchDataMobile(value);
+  }
+
+  function handleSearchChange(e: ChangeEvent<HTMLInputElement>): void {
+    const { value } = e.target;
+    setSearchData(value);
+  }
 
   useEffect(() => {
     function updateDimensions() {
@@ -37,34 +49,87 @@ function Room({CurrentRoomData}: {CurrentRoomData: RoomData | JoinData}) {
     };
   }, []);
 
+  function handleEnter(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      handleSubmit(searchData);
+    }
+  }
+
+  function handleSubmit(data: string) {
+    if (data.length != 0) {
+      console.log(data);
+      searchYoutube(data);
+      setSearchData("");
+    }
+  }
+
+  async function searchYoutube(query: string) {
+    const API_KEY = import.meta.env.VITE_YOUTUBE_KEY;
+    const BASE_URL = "https://www.googleapis.com/youtube/v3/search";
+    const params = new URLSearchParams({
+      part: "snippet",
+      q: `${query.trim()} karaoke`,
+      maxResults: "25",
+      type: "video",
+      key: API_KEY
+    });
+    const response: Response = await fetch(`${BASE_URL}?${params}`);
+    const data = await response.json();
+    // url: string;
+    // thumbnail: string;
+    // title: string;
+    // artist: string;
+    console.log(data);
+  }
+
   const [queuedVideos, setQueuedVideos] = useState<QueuedVideo[]>([
     {
-    url: "https://www.youtube.com/watch?v=kOHB85vDuow",
-    thumbnail: "https://i.ytimg.com/vi/kOHB85vDuow/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAdMUCbv12zLsP3ZZ8F7gn6CcGINA",
-    title: "Fancy",
-    artist: "Twice",
-    added_by: "Tim"
+      url: "https://www.youtube.com/watch?v=kOHB85vDuow",
+      thumbnail: "https://i.ytimg.com/vi/kOHB85vDuow/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAdMUCbv12zLsP3ZZ8F7gn6CcGINA",
+      title: "Fancy",
+      added_by: "Tim"
     }, 
     {
-    url: "https://www.youtube.com/watch?v=kOHB85vDuow",
-    thumbnail: "https://i.ytimg.com/vi/kOHB85vDuow/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAdMUCbv12zLsP3ZZ8F7gn6CcGINA",
-    title: "Fancy",
-    artist: "Twice",
-    added_by: "Tim"
+      url: "https://www.youtube.com/watch?v=kOHB85vDuow",
+      thumbnail: "https://i.ytimg.com/vi/kOHB85vDuow/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAdMUCbv12zLsP3ZZ8F7gn6CcGINA",
+      title: "Fancy",
+      added_by: "Tim"
     },
-        {
-    url: "https://www.youtube.com/watch?v=kOHB85vDuow",
-    thumbnail: "https://i.ytimg.com/vi/kOHB85vDuow/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAdMUCbv12zLsP3ZZ8F7gn6CcGINA",
-    title: "Fancy",
-    artist: "Twice",
-    added_by: "Tim"
+    {
+      url: "https://www.youtube.com/watch?v=kOHB85vDuow",
+      thumbnail: "https://i.ytimg.com/vi/kOHB85vDuow/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAdMUCbv12zLsP3ZZ8F7gn6CcGINA",
+      title: "Fancy",
+      added_by: "Tim"
     }, 
     {
-    url: "https://www.youtube.com/watch?v=kOHB85vDuow",
-    thumbnail: "https://i.ytimg.com/vi/kOHB85vDuow/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAdMUCbv12zLsP3ZZ8F7gn6CcGINA",
-    title: "Fancy",
-    artist: "Twice",
-    added_by: "Tim"
+      url: "https://www.youtube.com/watch?v=kOHB85vDuow",
+      thumbnail: "https://i.ytimg.com/vi/kOHB85vDuow/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAdMUCbv12zLsP3ZZ8F7gn6CcGINA",
+      title: "Fancy",
+      added_by: "Tim"
+    },
+    {
+      url: "https://www.youtube.com/watch?v=kOHB85vDuow",
+      thumbnail: "https://i.ytimg.com/vi/kOHB85vDuow/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAdMUCbv12zLsP3ZZ8F7gn6CcGINA",
+      title: "Fancy",
+      added_by: "Tim"
+    },
+    {
+      url: "https://www.youtube.com/watch?v=kOHB85vDuow",
+      thumbnail: "https://i.ytimg.com/vi/kOHB85vDuow/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAdMUCbv12zLsP3ZZ8F7gn6CcGINA",
+      title: "Fancy",
+      added_by: "Tim"
+    },
+    {
+      url: "https://www.youtube.com/watch?v=kOHB85vDuow",
+      thumbnail: "https://i.ytimg.com/vi/kOHB85vDuow/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAdMUCbv12zLsP3ZZ8F7gn6CcGINA",
+      title: "Fancy",
+      added_by: "Tim"
+    },
+    {
+      url: "https://www.youtube.com/watch?v=kOHB85vDuow",
+      thumbnail: "https://i.ytimg.com/vi/kOHB85vDuow/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAdMUCbv12zLsP3ZZ8F7gn6CcGINA",
+      title: "Fancy",
+      added_by: "Tim"
     },
   ]);
   const [searchedVideos, setSearchedVideos] = useState<Video[]>([]);
@@ -72,7 +137,6 @@ function Room({CurrentRoomData}: {CurrentRoomData: RoomData | JoinData}) {
     url: "https://www.youtube.com/watch?v=kOHB85vDuow",
     thumbnail: "https://i.ytimg.com/vi/kOHB85vDuow/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAdMUCbv12zLsP3ZZ8F7gn6CcGINA",
     title: "Fancy",
-    artist: "Twice"
   });
   const room_id = 12345; //CurrentRoomData.room_code;
   const room_url = 'https://karaoketube.io/room/${room_id}';
@@ -93,9 +157,7 @@ function Room({CurrentRoomData}: {CurrentRoomData: RoomData | JoinData}) {
                   )
                 })}
               </div>
-              <div id="search_title" className="text-2xl self-center mb-2">
-                <span>Search</span>
-              </div>
+              <input id="search_bar_mobile" value={searchDataMobile} onChange={handleMobileSearchChange} className="border-2 border-gray-300 rounded-md self-start text-4xl" placeholder="Search"/>
               <div id="search" className="flex-col flex-grow self-center text-2xl overflow-scroll">
                 <span>Search</span>
               </div>
@@ -127,15 +189,17 @@ function Room({CurrentRoomData}: {CurrentRoomData: RoomData | JoinData}) {
             </div>
           </div>
           <div className="flex justify-evenly flex-grow">
-            <div className="self-start text-2xl">
-              <span>Queue</span>
-              {queuedVideos.map((video) => {
-                return (
-                  <VideoData Video={video} />
-                )
-              })}
+            <div className="flex flex-col justify-center self-start text-2xl">
+              <span className="self-center text-4xl">Queue</span>
+              <div id="queue" className="flex-col text-2xl overflow-y-scroll" style={{maxHeight: "80vh"}}>
+                {queuedVideos.map((video) => {
+                  return (
+                    <VideoData Video={video} />
+                  )
+                })}
+              </div>
             </div>
-            <div className="self-start text-2xl">Search</div>
+            <input id="search_bar_desktop" onKeyDown={handleEnter} value={searchData} onChange={handleSearchChange} className="border-2 border-gray-300 rounded-md self-start text-4xl" placeholder="Search"/>
           </div>
         </div>
       }
