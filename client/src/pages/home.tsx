@@ -1,20 +1,9 @@
 import { ChangeEvent, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavigateFunction, useNavigate } from "react-router-dom";
+import { RoomData, JoinData } from "../other/interfaces";
 
-export interface RoomData {
-  room_name: string;
-  host_name: string;
-  create_room_password: string;
-}
-
-export interface JoinData {
-  user_name: string;
-  room_code: string;
-  join_room_password: string;
-}
-
-function Home() {
-  const navigate = useNavigate();
+function Home(): JSX.Element {
+  const navigate: NavigateFunction = useNavigate();
 
   const [createRoomData, setCreateRoomData] = useState<RoomData>({
     room_name: "",
@@ -28,8 +17,8 @@ function Home() {
     join_room_password: "",
   });
 
-  const [createDataIsFilled, setCreateDataIsFilled] = useState<boolean>(false);
-  const [joinDataIsFilled, setJoinDataIsFilled] = useState<boolean>(false);
+  const [createRoomDataIsFilled, setCreateRoomDataIsFilled] = useState<boolean>(false);
+  const [joinRoomDataIsFilled, setJoinRoomDataIsFilled] = useState<boolean>(false);
 
   function handleCreateRoomChange(e: ChangeEvent<HTMLInputElement>): void {
     const { id, value } = e.target; // Captures the element being changed
@@ -40,7 +29,7 @@ function Home() {
   }
 
   useEffect(() => {
-    setCreateDataIsFilled(checkRoomData(createRoomData));
+    setCreateRoomDataIsFilled(checkRoomData(createRoomData));
   }, [createRoomData]);
 
   function checkRoomData(data: RoomData): boolean {
@@ -56,7 +45,7 @@ function Home() {
   }
 
   useEffect(() => {
-    setJoinDataIsFilled(checkJoinData(joinData));
+    setJoinRoomDataIsFilled(checkJoinData(joinData));
   }, [joinData]);
 
   function checkJoinData(data: JoinData): boolean {
@@ -64,31 +53,97 @@ function Home() {
   }
 
   function handleCreateRoom() {
-    if (createDataIsFilled) {
+    if (createRoomDataIsFilled) {
       navigate("/room", {state: createRoomData});
     }
   }
 
   function handleJoinRoom() {
-    if (joinDataIsFilled) {
+    if (joinRoomDataIsFilled) {
       navigate("/room", {state: joinData});
     }
   }
 
   return (
     <>
-      <div id="body" className="flex flex-col sm:flex-row flex-grow justify-evenly sm:gap-10 sm:justify-center sm:items-center mx-8">
-        <div id="create_room" className="flex flex-col sm:flex-grow max-w-screen-md text-screen-md">
-          <input id="room_name" value={createRoomData.room_name} onChange={handleCreateRoomChange} className="border-2 border-gray-300 rounded-md p-2 m-1" type="text" placeholder="Room Name"/>
-          <input id="host_name" value={createRoomData.host_name} onChange={handleCreateRoomChange} className="border-2 border-gray-300 rounded-md p-2 m-1" type="text" placeholder="Host Name"/>
-          <input id="create_room_password" value={createRoomData.create_room_password} onChange={handleCreateRoomChange} className="border-2 border-gray-300 rounded-md p-2 m-1" type="text" placeholder="Room Password"/>
-          <button id="create_button" onClick={handleCreateRoom} className={`${createDataIsFilled ? "bg-red-500" : "cursor-not-allowed"} border-2 border-gray-300 rounded-md p-2 m-1`}>Create Room</button>
+      <div
+        id="body"
+        className="flex flex-col sm:flex-row flex-grow justify-evenly sm:gap-10 sm:justify-center
+          sm:items-center my-4 min-w-72 sm:text-xl"
+      >
+        <div
+          id="create_room"
+          className="flex flex-col sm:flex-grow max-w-screen-sm text-screen-md sm:gap-2"
+        >
+          <input
+            id="room_name"
+            value={createRoomData.room_name}
+            onChange={handleCreateRoomChange}
+            type="text"
+            placeholder="Room Name"
+            className="border-2 border-gray-300 rounded-md p-2 m-1"
+          />
+          <input
+            id="host_name"
+            value={createRoomData.host_name}
+            onChange={handleCreateRoomChange}
+            type="text"
+            placeholder="Host Name"
+            className="border-2 border-gray-300 rounded-md p-2 m-1" 
+          />
+          <input
+            id="create_room_password"
+            value={createRoomData.create_room_password}
+            onChange={handleCreateRoomChange}
+            type="text"
+            placeholder="Room Password"
+            className="border-2 border-gray-300 rounded-md p-2 m-1"
+          />
+          <button
+            id="create_button"
+            onClick={handleCreateRoom}
+            className={`${createRoomDataIsFilled ? "bg-red-500" : "cursor-not-allowed"}
+              border-2 border-gray-300 rounded-md p-2 m-1`}
+          >
+            Create Room
+          </button>
         </div>
-        <div id="join_room" className="flex flex-col sm:flex-grow max-w-screen-md text-screen-md">
-          <input id="user_name" value={joinData.user_name} onChange={handleJoinRoomChange} className="border-2 border-gray-300 rounded-md p-2 m-1" type="text" placeholder="Your Name"/>
-          <input id="room_code" value={joinData.room_code} onChange={handleJoinRoomChange} className="border-2 border-gray-300 rounded-md p-2 m-1" type="text" placeholder="Room Code"/>
-          <input id="join_room_password" value={joinData.join_room_password} onChange={handleJoinRoomChange} className="border-2 border-gray-300 rounded-md p-2 m-1" type="text" placeholder="Room Password"/>
-          <button id="join_button" onClick={handleJoinRoom} className={`${joinDataIsFilled ? "bg-red-500" : "cursor-not-allowed"} border-2 border-gray-300 rounded-md p-2 m-1`}>Join Room</button>
+        <div
+          id="join_room"
+          className="flex flex-col sm:flex-grow max-w-screen-sm text-screen-md sm:mt-0 mt-4 sm:gap-2"
+        >
+          <input
+            id="user_name"
+            value={joinData.user_name}
+            onChange={handleJoinRoomChange}
+            type="text"
+            placeholder="Your Name"
+            className="border-2 border-gray-300 rounded-md p-2 m-1" 
+          />
+          <input
+            id="room_code"
+            value={joinData.room_code}
+            onChange={handleJoinRoomChange}
+            type="text"
+            placeholder="Room Code"
+            className="border-2 border-gray-300 rounded-md p-2 m-1"
+          />
+          <input
+            id="join_room_password"
+            value={joinData.join_room_password}
+            onChange={handleJoinRoomChange}
+            type="text"
+            placeholder="Room Password"
+            className="border-2 border-gray-300 rounded-md p-2 m-1"
+          />
+          <button
+            id="join_button"
+            onClick={handleJoinRoom}
+            className={`${joinRoomDataIsFilled ? "bg-red-500" : "cursor-not-allowed"}
+              border-2 border-gray-300 rounded-md p-2 m-1`}
+          >
+            Join Room
+          </button>
         </div>
       </div>
     </>

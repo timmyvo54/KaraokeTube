@@ -5,7 +5,7 @@ import Footer from "./footer";
 function Layout() {
   return (
     <>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen min-w-[280px] flex flex-col mx-4">
         <Header />
         <Outlet />
         <Footer />
