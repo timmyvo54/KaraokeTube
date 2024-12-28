@@ -14,6 +14,10 @@ interface Video {
   title: string;
 }
 
+interface YoutubeSearchItem {
+  [key: string]: any
+}
+
 function Room({CurrentRoomData}: {CurrentRoomData: RoomData | JoinData}) {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
@@ -75,10 +79,16 @@ function Room({CurrentRoomData}: {CurrentRoomData: RoomData | JoinData}) {
     });
     const response: Response = await fetch(`${BASE_URL}?${params}`);
     const data = await response.json();
+    setSearchedVideos(data.items.map((item: { id: { videoId: any; }; snippet: { thumbnails: { high: { url: any; }; }; title: any; }; }) => {
+      return {
+        url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
+        thumbnail: item.snippet.thumbnails.high.url,
+        title: item.snippet.title
+      }
+    }));
     // url: string;
     // thumbnail: string;
     // title: string;
-    // artist: string;
     console.log(data);
   }
 
@@ -199,7 +209,19 @@ function Room({CurrentRoomData}: {CurrentRoomData: RoomData | JoinData}) {
                 })}
               </div>
             </div>
-            <input id="search_bar_desktop" onKeyDown={handleEnter} value={searchData} onChange={handleSearchChange} className="border-2 border-gray-300 rounded-md self-start text-4xl" placeholder="Search"/>
+            <div className="flex flex-col justify-center self-start text-2xl">
+              <input id="search_bar_desktop" onKeyDown={handleEnter} value={searchData} onChange={handleSearchChange} className="border-2 border-gray-300 rounded-md self-start text-4xl" placeholder="Search"/>
+              <div id="search" className="flex-col text-2xl overflow-y-scroll" style={{maxHeight: "80vh"}}>
+                {searchedVideos.map((video) => {
+                  return (
+                    <div className="flex flex-col items-center">
+                      <img src={video.thumbnail} alt={video.title} className="w-1/2"/>
+                      <span>{`${video.title}`}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         </div>
       }
