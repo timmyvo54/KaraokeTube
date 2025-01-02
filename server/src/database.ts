@@ -1,15 +1,27 @@
-import { MongoClient } from "mongodb";
+import { Db, MongoClient } from "mongodb";
 import { DATABASE_URL } from "./config";
 
-const client: MongoClient = new MongoClient(DATABASE_URL);
+let client: MongoClient;
+let db: Db;
 
-export async function connectToDatabase(): Promise<MongoClient> {
+export async function connectToDatabase(dbName: string): Promise<Db> {
   try {
+    client = new MongoClient(DATABASE_URL);
     await client.connect();
     console.log("Connected to MongoDB!");
-    return client;
   } catch (error: unknown) {
     console.error("Failed to connect to MongoDB.", error);
     throw error;
+  }
+  if (!db) {
+    db = client.db(dbName);
+  }
+  return db;
+}
+
+export async function closeDatabase(): Promise<void> {
+  if (client) {
+    await client.close();
+    console.log("Disconnected from MongoDB.");
   }
 }

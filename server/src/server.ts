@@ -13,7 +13,6 @@ app.use("/api", routes);
 
 (async (): Promise<void> => {
   try {
-    await connectToDatabase();
     app.listen(PORT, (): void => {
       console.log(`The server is running on port ${PORT}`);
     });
