@@ -21,6 +21,9 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Set DATABASE_URL
+        run: echo "DATABASE_URL=mongodb://localhost:3000/test_database" >> $GITHUB_ENV
+
       - name: Install Server Dependencies
         run: |
           cd server
