@@ -25,7 +25,7 @@ export async function createRoom(req: Request, res: Response): Promise<void> {
     // Handles missing values
     if (!roomName || !hostName || !password) {
       res.status(400).json({
-        message: "Request must contain a room name, host name, and password",
+        message: "Request must contain a room name, host name, and password.",
       });
       return;
     }
@@ -36,7 +36,7 @@ export async function createRoom(req: Request, res: Response): Promise<void> {
       typeof password !== "string"
     ) {
       res.status(400).json({
-        message: "Room name, host name, and password must all be strings",
+        message: "Room name, host name, and password must all be strings.",
       });
       return;
     }
@@ -50,7 +50,7 @@ export async function createRoom(req: Request, res: Response): Promise<void> {
       password.length > 100
     ) {
       res.status(400).json({
-        message: "Room name, host name, or password is too long",
+        message: "Room name, host name, or password is too long.",
       });
       return;
     }
@@ -61,7 +61,7 @@ export async function createRoom(req: Request, res: Response): Promise<void> {
       password.length === 0
     ) {
       res.status(400).json({
-        message: "Room name, host name, or password is empty",
+        message: "Room name, host name, or password is empty.",
       });
       return;
     }
