@@ -52,9 +52,33 @@ function Home(): JSX.Element {
     return data.user_name !== "" && data.room_code !== "" && data.join_room_password !== "";
   }
 
-  function handleCreateRoom() {
+  async function handleCreateRoom() {
     if (createRoomDataIsFilled) {
-      navigate("/room", {state: createRoomData});
+      try {
+        const response: Response = await fetch("http://localhost:25565/api/create-room", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            roomName: createRoomData.room_name,
+            hostName: createRoomData.host_name,
+            password: createRoomData.create_room_password})
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`Room created with ID: ${data.roomDetails.roomId}`);
+          // Implement navigation
+          // navigate(`/rooms/${data.roomDetails.roomId}`);
+        } else {
+          const error = await response.json();
+          alert(`Error: ${error.message}`);
+        }
+      } catch (error: unknown) {
+        console.error("Error while creating room:", error);
+        alert("An unexpected error has occurred.");
+      }
     }
   }
 
