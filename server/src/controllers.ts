@@ -40,6 +40,7 @@ export async function createRoom(req: Request, res: Response): Promise<void> {
       });
       return;
     }
+    // Removes white space from both sides
     roomName = roomName.trim();
     hostName = hostName.trim();
     password = password.trim();
