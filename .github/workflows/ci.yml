@@ -24,6 +24,9 @@ jobs:
       - name: Set DATABASE_URL
         run: echo "DATABASE_URL=mongodb://localhost:3000/test_database" >> $GITHUB_ENV
 
+      - name: Set NODE_ENV
+        run: echo "NODE_ENV=development" >> $GITHUB_ENV
+
       - name: Install Server Dependencies
         run: |
           cd server
