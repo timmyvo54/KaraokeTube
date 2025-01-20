@@ -1,0 +1,38 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Set DATABASE_URL
+        run: echo "DATABASE_URL=mongodb://localhost:3000/test_database" >> $GITHUB_ENV
+
+      - name: Set NODE_ENV
+        run: echo "NODE_ENV=development" >> $GITHUB_ENV
+
+      - name: Install Server Dependencies
+        run: |
+          cd server
+          npm install
+
+      - name: Run Server Tests
+        run: |
+          cd server
+          npm run test
