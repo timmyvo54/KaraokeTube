@@ -258,9 +258,15 @@ describe("POST /api/create-room tests.", (): void => {
         roomDetails: {
           roomId: expect.any(String),
           roomName,
-          hostName,
+          host: {
+            name: hostName,
+            userId: 0
+          },
           password,
-          users: [hostName],
+          users: [{
+            name: hostName,
+            userId: 0
+          }],
           currentVideo: null,
           queue: [],
           createdAt: expect.any(String),

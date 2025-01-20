@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { connectToDatabase } from "./database";
-import { Room } from "./interfaces";
+import { Room, User } from "./interfaces";
 import { generateRoomId } from "./utils";
 
 /**
@@ -81,12 +81,17 @@ export async function createRoom(req: Request, res: Response): Promise<void> {
       }
     }
 
+    const hostUser: User = {
+      name: hostName,
+      userId: 0
+    };
+
     const newRoom: Room = {
       roomId: newRoomId,
       roomName: roomName,
-      hostName: hostName,
+      host: hostUser,
       password: password,
-      users: [hostName],
+      users: [hostUser],
       currentVideo: null,
       queue: [],
       createdAt: new Date(),
