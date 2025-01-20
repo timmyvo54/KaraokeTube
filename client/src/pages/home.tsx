@@ -82,9 +82,33 @@ function Home(): JSX.Element {
     }
   }
 
-  function handleJoinRoom() {
+  async function handleJoinRoom() {
     if (joinRoomDataIsFilled) {
-      navigate("/room", {state: joinData});
+      try {
+        const response: Response = await fetch("http://localhost:25565/api/join-room", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name: joinData.user_name,
+            roomCode: joinData.room_code,
+            password: joinData.join_room_password})
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`Room joined with ID: ${data.roomDetails.roomId}`);
+          // Implement navigation
+          // navigate(`/rooms/${data.roomDetails.roomId}`);
+        } else {
+          const error = await response.json();
+          alert(`Error: ${error.message}`);
+        }
+      } catch (error: unknown) {
+        console.error("Error while creating room:", error);
+        alert("An unexpected error has occurred.");
+      }
     }
   }
 
