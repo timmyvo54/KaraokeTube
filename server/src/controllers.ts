@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { connectToDatabase } from "./database";
 import { Room, User } from "./interfaces";
 import { generateRoomId } from "./utils";
+import { PushOperator } from "mongodb";
 
 /**
  * Creates a room given room details.
@@ -108,6 +109,117 @@ export async function createRoom(req: Request, res: Response): Promise<void> {
     console.error("An unknown error occurred while creating room.", error);
     res.status(500).json({
       message: "Unknown error encountered while creating room.",
+    });
+    return;
+  }
+}
+
+/**
+ * Joins a room given room details.
+ * @param {Request} req - The request object
+ * @param {Response} res - The response object
+ * @returns A promise that resolves to void
+ */
+export async function joinRoom(req: Request, res: Response): Promise<void> {
+  /**
+   * @name - The name of the user joining the room.
+   * @roomCode - The unique identifying code of the room.
+   * @password - The password for the room.
+   * @responses
+   * 400 - Input is not valid.
+   * 404 - Room with code does not exist.
+   * 403 - Password does not match room password.
+   * 500 - External/unknown error.
+   * 200 - Successful joins room.
+   * @roomDetails - Contains information about the room the user is joining.
+   */
+  try {
+    let { name, roomCode, password } = req.body;
+    // Handles missing values
+    if (!name || !roomCode || !password) {
+      res.status(400).json({
+        message: "Request must contain a name, roomCode, and password.",
+      });
+      return;
+    }
+    // Handles variables that aren't strings
+    if (
+      typeof name !== "string" ||
+      typeof roomCode !== "string" ||
+      typeof password !== "string"
+    ) {
+      res.status(400).json({
+        message: "Name, room code, and password must all be strings.",
+      });
+      return;
+    }
+    // Removes white space from both sides
+    name = name.trim();
+    roomCode = roomCode.trim();
+    password = password.trim();
+    // Handles variables that are too long
+    if (
+      name.length > 100 ||
+      roomCode.length > 100 ||
+      password.length > 100
+    ) {
+      res.status(400).json({
+        message: "Name, room code, and password is too long.",
+      });
+      return;
+    }
+    // Check that strings are non empty
+    if (
+      name.length === 0 ||
+      roomCode.length === 0 ||
+      password.length === 0
+    ) {
+      res.status(400).json({
+        message: "Name, room code, and password is empty.",
+      });
+      return;
+    }
+    const db = await connectToDatabase("karaoke_tube");
+    const roomCollection = db.collection("rooms");
+    // Check that room code exists
+    const roomsArray = await roomCollection.find({ roomId: roomCode }).toArray();
+    if (roomsArray.length === 0) {
+      res.status(404).json({
+        message: "Room with code does not exist.",
+      });
+      return;
+    }
+    // Check that password matches
+    if (roomsArray[0].password !== password) {
+      res.status(403).json({
+        message: "Password does not match room password.",
+      });
+      return;
+    }
+
+    const newUser: User = {
+      name: name,
+      userId: roomsArray[0].users.length
+    };
+
+    const updatedRoom = await roomCollection.findOneAndUpdate(
+      { roomId: roomCode },
+      { $push: { users: newUser } as PushOperator<Document>},
+      {
+        returnDocument: "after"
+      }
+    );
+    console.log("Updated room:", updatedRoom!.value);
+
+    res.status(200).json({
+      message: "Room successfully joined!",
+      roomDetails: updatedRoom,
+    });
+    return;
+  } catch (error: unknown) {
+    console.error("An unknown error occurred while joining room.", error);
+    res.status(500).json({
+      message: "Unknown error encountered while joining room.",
     });
     return;
   }
