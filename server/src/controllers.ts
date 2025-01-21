@@ -138,7 +138,7 @@ export async function joinRoom(req: Request, res: Response): Promise<void> {
     // Handles missing values
     if (!name || !roomCode || !password) {
       res.status(400).json({
-        message: "Request must contain a name, roomCode, and password.",
+        message: "Request must contain a name, room code, and password.",
       });
       return;
     }
@@ -213,7 +213,7 @@ export async function joinRoom(req: Request, res: Response): Promise<void> {
 
     res.status(200).json({
       message: "Room successfully joined!",
-      roomDetails: updatedRoom,
+      roomDetails: updatedRoom!.value,
     });
     return;
   } catch (error: unknown) {
