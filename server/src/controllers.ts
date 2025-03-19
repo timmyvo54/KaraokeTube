@@ -147,6 +147,11 @@ export async function joinRoom(req: Request, res: Response): Promise<void> {
    * 200 - Successful joins room.
    * @roomDetails - Contains information about the room the user is joining.
    */
+
+  /** 
+   * @todo Set user's cookie
+   */
+
   try {
     let { name, roomCode, password } = req.body;
     // Handles missing values
@@ -237,4 +242,16 @@ export async function joinRoom(req: Request, res: Response): Promise<void> {
     });
     return;
   }
+}
+
+/**
+ * Handles the handshake between the client and server.
+ * @param {Request} req - The request object
+ * @param {Response} res - The response object
+ * @returns A promise that resolves to void
+ */
+export async function handshake(req: Request, res: Response): Promise<void> {
+  /**
+   * @todo Implement
+   */
 }

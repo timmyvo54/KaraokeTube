@@ -27,6 +27,12 @@ function Room({CurrentRoomData}: {CurrentRoomData: RoomData | JoinData}) {
 
   const { id } = useParams<{ id: string }>();
 
+  /**
+   * @todo Send the cookies to the server to authenticate the user
+   * @todo If the user is not authenticated, redirect them to the home page
+   * @todo If cookies are present shake their hand
+   */
+
   function handleMobileSearchChange(e: ChangeEvent<HTMLInputElement>): void {
     const { value } = e.target;
     setSearchDataMobile(value);
