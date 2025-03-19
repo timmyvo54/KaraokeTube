@@ -12,7 +12,7 @@ const routes = [
         element: <App />
       },
       {
-        path: "room",
+        path: "room/:id",
         element: <Room />
       }
     ]

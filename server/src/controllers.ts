@@ -3,6 +3,7 @@ import { connectToDatabase } from "./database";
 import { Room, User } from "./interfaces";
 import { generateRoomId } from "./utils";
 import { PushOperator } from "mongodb";
+import { NODE_ENV } from "./config";
 
 /**
  * Creates a room given room details.
@@ -99,6 +100,19 @@ export async function createRoom(req: Request, res: Response): Promise<void> {
     };
     const result = await roomCollection.insertOne(newRoom);
     console.log("Room inserted with ID:", result.insertedId);
+
+    /**
+     * @todo Send cookie with authentication details to user
+     */
+    const auth = JSON.stringify({
+      hostUser, newRoomId, password
+    });
+    res.cookie("auth", auth, {
+      httpOnly: true,
+      secure: NODE_ENV === "development" ? false : true,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
 
     res.status(201).json({
       message: "Room successfully created!",

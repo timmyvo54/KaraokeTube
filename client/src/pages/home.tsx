@@ -69,8 +69,10 @@ function Home(): JSX.Element {
         if (response.ok) {
           const data = await response.json();
           console.log(`Room created with ID: ${data.roomDetails.roomId}`);
-          // Implement navigation
-          // navigate(`/rooms/${data.roomDetails.roomId}`);
+          /**
+           * @todo Implement navigation
+           */
+          navigate(`/room/${data.roomDetails.roomId}`);
         } else {
           const error = await response.json();
           alert(`Error: ${error.message}`);

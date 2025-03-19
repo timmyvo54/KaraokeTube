@@ -1,4 +1,5 @@
 import { ChangeEvent, useState, useEffect} from "react";
+import { useParams } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { RoomData, JoinData } from "./home";
 import Player from "../other/youtube";
@@ -23,6 +24,8 @@ function Room({CurrentRoomData}: {CurrentRoomData: RoomData | JoinData}) {
 
   const [searchData, setSearchData] = useState<string>("");
   const [searchDataMobile, setSearchDataMobile] = useState<string>("");
+
+  const { id } = useParams<{ id: string }>();
 
   function handleMobileSearchChange(e: ChangeEvent<HTMLInputElement>): void {
     const { value } = e.target;
