@@ -8,7 +8,10 @@ const app: Express = express();
 const PORT = 25565;
 
 if (NODE_ENV === "development") {
-  app.use(cors());
+  app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+  }));
 } else {
   console.log("CORS not enabled for production.");
 }

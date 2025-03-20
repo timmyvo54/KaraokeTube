@@ -109,8 +109,8 @@ export async function createRoom(req: Request, res: Response): Promise<void> {
     });
     res.cookie("auth", auth, {
       httpOnly: true,
-      secure: NODE_ENV === "development" ? false : true,
-      sameSite: "strict",
+      secure: NODE_ENV !== "development",
+      sameSite: NODE_ENV === "development" ? "none" : "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
@@ -239,6 +239,47 @@ export async function joinRoom(req: Request, res: Response): Promise<void> {
     console.error("An unknown error occurred while joining room.", error);
     res.status(500).json({
       message: "Unknown error encountered while joining room.",
+    });
+    return;
+  }
+}
+
+/**
+ * Verifies that room exists.
+ * @param {Request} req - The request object
+ * @param {Response} res - The response object
+ * @returns A promise that resolves to void
+ */
+export async function verifyRoomExists(req: Request, res: Response): Promise<void> {
+  try {
+    /**
+     * @roomCode - The unique identifying code of the room.
+     * @responses
+     * 404 - Room code does not exist.
+     * 500 - External/unknown error.
+     * 200 - Room code exists.
+     */
+    const roomCode = req.query.roomCode as string;
+
+    // Connect to database
+    const db = await connectToDatabase("karaoke_tube");
+    const roomCollection = db.collection("rooms");
+
+    // Check that room code exists
+    const roomsArray = await roomCollection.find({ roomId: roomCode }).toArray();
+    if (roomsArray.length === 0) {
+      res.status(404).json({
+        message: "Room with code does not exist.",
+      });
+    } else {
+      res.status(200).json({
+        message: "Room exists.",
+      });
+    }
+    return;
+  } catch (error: unknown) {
+    res.status(500).json({
+      message: "Unknown error encountered while verifying room details."
     });
     return;
   }

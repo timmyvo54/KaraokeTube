@@ -1,5 +1,5 @@
 import { ChangeEvent, useState, useEffect} from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { RoomData, JoinData } from "./home";
 import Player from "../other/youtube";
@@ -20,18 +20,13 @@ interface YoutubeSearchItem {
 }
 
 function Room({CurrentRoomData}: {CurrentRoomData: RoomData | JoinData}) {
+  const navigate = useNavigate();
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   const [searchData, setSearchData] = useState<string>("");
   const [searchDataMobile, setSearchDataMobile] = useState<string>("");
 
   const { id } = useParams<{ id: string }>();
-
-  /**
-   * @todo Send the cookies to the server to authenticate the user
-   * @todo If the user is not authenticated, redirect them to the home page
-   * @todo If cookies are present shake their hand
-   */
 
   function handleMobileSearchChange(e: ChangeEvent<HTMLInputElement>): void {
     const { value } = e.target;
@@ -43,13 +38,40 @@ function Room({CurrentRoomData}: {CurrentRoomData: RoomData | JoinData}) {
     setSearchData(value);
   }
 
+  async function verifyRoomExists(roomCode: string): Promise<boolean> {
+    const response: Response = await fetch(`http://localhost:25565/api/verify-room-exist/?roomCode=${roomCode}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      },
+    });
+    return response.ok;
+  }
+
   useEffect(() => {
+    /**
+     * @todo Send the cookies to the server to authenticate the user
+     * @todo If the user is not authenticated, redirect them to the home page
+     * @todo If cookies are present shake their hand
+     */
+    console.log(id);
+    if (!id || id.length !== 4) {
+      navigate("/");
+    }
+
+    // Check if room with id exists on our database
+    verifyRoomExists(id!).then((exists: boolean) => {
+      if (!exists) {
+        navigate("/");
+      }
+    });
+
     function updateDimensions() {
       const width = window.innerWidth * 0.5;
       const height = (width / 16) * 9;  // 16:9 aspect ratio formula
       setDimensions({ width, height });
     };
-
+    
     // Update on resize
     window.addEventListener('resize', updateDimensions);
 

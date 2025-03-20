@@ -57,6 +57,7 @@ function Home(): JSX.Element {
       try {
         const response: Response = await fetch("http://localhost:25565/api/create-room", {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json"
           },
