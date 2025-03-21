@@ -340,9 +340,6 @@ export async function handshake(req: Request, res: Response): Promise<void> {
       });
       return;
     }
-    /**
-     * @TODO implement handshake
-     */
     res.status(200).json({
       message: "Connection successfully established.",
     });
