@@ -93,7 +93,7 @@ export async function createRoom(req: Request, res: Response): Promise<void> {
       roomName: roomName,
       host: hostUser,
       password: password,
-      users: [hostUser],
+      users: [],
       currentVideo: null,
       queue: [],
       createdAt: new Date(),
@@ -293,6 +293,74 @@ export async function verifyRoomExists(req: Request, res: Response): Promise<voi
  */
 export async function handshake(req: Request, res: Response): Promise<void> {
   /**
-   * @todo Implement
+   * @authCookie - The information contained required to establish a handshake.
+   * @responses
+   * 401 - Authentication cookie does not exist
+   * 500 - External/unknown error.
+   * 200 - Connection successfully established.
    */
+  try {
+    const authCookie: string = req.cookies.auth as string;
+    console.log(authCookie);
+    if (!authCookie) {
+      res.status(401).json({
+        message: "Authentication cookie does not exist."
+      });
+      return;
+    }
+    const { hostUser, newRoomId, password } = JSON.parse(authCookie);
+    if (!hostUser || !newRoomId || !password) {
+      res.status(401).json({
+        message: "Cookie does not contain all necessary information."
+      });
+      return;
+    }
+    // Check that newRoomId exists and if it does, check the password
+    const db = await connectToDatabase("karaoke_tube");
+    const roomCollection = db.collection("rooms");
+    const roomsArray = await roomCollection.find({ roomId: newRoomId }).toArray();
+    // Check that room exists
+    if (roomsArray.length === 0) {
+      res.status(404).json({
+        message: "Room with code does not exist.",
+      });
+      return;
+    };
+    // Check that password matches
+    if (roomsArray[0].password !== password) {
+      res.status(401).json({
+        message: "Incorrect room password.",
+      });
+      return;
+    }
+    // Check that user with id does not already exist in the room
+    if (roomsArray[0].users.some((user: { name: string, userId: number }) => user.userId == hostUser.userId)) {
+      res.status(401).json({
+        message: "User already exists in room."
+      });
+      return;
+    }
+    /**
+     * @TODO implement handshake
+     */
+    res.status(200).json({
+      message: "Connection successfully established.",
+    });
+    return;
+  } catch (error: unknown) { 
+    console.error("An unknown error occurred during handshake.", error);
+    res.status(500).json({
+      message: "Unknown error encountered during handshake."
+    });
+  }
+}
+
+/**
+ * Handles leaving the room.
+ * @param {Request} req - The request object
+ * @param {Response} res - The response object
+ * @returns A promise that resolves to void
+ */
+export async function exitRoom(req: Request, res: Response): Promise<void> {
+  // @todo Implement
 }

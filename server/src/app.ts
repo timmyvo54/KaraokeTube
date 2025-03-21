@@ -1,4 +1,5 @@
 import express, { Express } from "express";
+import cookieParser from "cookie-parser";
 import routes from "./routes";
 import cors from "cors";
 import { NODE_ENV } from "./config";
@@ -18,6 +19,9 @@ if (NODE_ENV === "development") {
 
 // Parse JSON body
 app.use(express.json());
+
+// Parse cookies
+app.use(cookieParser());
 
 app.use("/api", routes);
 

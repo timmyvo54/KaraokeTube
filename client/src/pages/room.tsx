@@ -59,13 +59,17 @@ function Room({CurrentRoomData}: {CurrentRoomData: RoomData | JoinData}) {
       navigate("/");
     }
 
-    // Check if room with id exists on our database
+    // Check if room with id exists on our database if not redirect to home page
     verifyRoomExists(id!).then((exists: boolean) => {
       if (!exists) {
         navigate("/");
       }
     });
 
+    // Handle the handshake between the client and server
+    // @todo Implement handshake
+    const socket = io("http://localhost:5173");
+  
     function updateDimensions() {
       const width = window.innerWidth * 0.5;
       const height = (width / 16) * 9;  // 16:9 aspect ratio formula
