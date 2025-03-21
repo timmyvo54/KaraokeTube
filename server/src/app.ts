@@ -6,6 +6,11 @@ import { NODE_ENV } from "./config";
 
 const app: Express = express();
 
+/**
+ * @TODO reconfigure server to allow websocket support
+ * @TODO add basic connection and disconnection logic
+ */
+
 const PORT = 25565;
 
 if (NODE_ENV === "development") {

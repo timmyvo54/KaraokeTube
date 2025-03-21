@@ -67,8 +67,10 @@ function Room({CurrentRoomData}: {CurrentRoomData: RoomData | JoinData}) {
     });
 
     // Handle the handshake between the client and server
-    // @todo Implement handshake
-    const socket = io("http://localhost:5173");
+    /**
+     * @TODO call handshake endpoint
+     * @TODO connect room data from server and populate client with data
+     */
   
     function updateDimensions() {
       const width = window.innerWidth * 0.5;
