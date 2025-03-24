@@ -251,8 +251,14 @@ describe("POST /api/create-room tests.", (): void => {
           hostName,
           password,
         });
+      const cookies = response.headers["set-cookie"];
+      const cookieArray = Array.isArray(cookies) ? cookies : [cookies];
+      const authCookie = cookieArray.find((cookie: string): boolean =>
+        cookie.startsWith("auth=")
+      );
       expect(consoleErrorSpy).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(201);
+      expect(authCookie).toBeDefined();
       expect(response.body).toEqual({
         message: "Room successfully created!",
         roomDetails: {
@@ -260,7 +266,7 @@ describe("POST /api/create-room tests.", (): void => {
           roomName,
           host: {
             name: hostName,
-            userId: 0
+            userId: 0,
           },
           password,
           users: [],
