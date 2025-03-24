@@ -335,7 +335,7 @@ describe("POST /api/join-room tests.", (): void => {
     });
   });
   describe("Successful tests", (): void => {
-    test("Should successfully join and return room details.", async (): Promise<void> => {
+    test("Should successfully receive auth cookie.", async (): Promise<void> => {
       consoleErrorSpy.mockRestore();
       const response: SupertestResponse = await request(server)
         .post("/api/join-room")
@@ -354,28 +354,6 @@ describe("POST /api/join-room tests.", (): void => {
       expect(authCookie).toBeDefined();
       expect(response.body).toEqual({
         message: "Room successfully joined!",
-        roomDetails: {
-          roomId: roomCode,
-          roomName: "Test room name",
-          host: {
-            name: "hostName",
-            userId: 0,
-          },
-          password: password,
-          users: [
-            {
-              name: "hostName",
-              userId: 0,
-            },
-            {
-              name: name,
-              userId: 1,
-            },
-          ],
-          currentVideo: null,
-          queue: [],
-          createdAt: expect.any(String),
-        },
       });
     });
   });

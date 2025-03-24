@@ -212,15 +212,6 @@ export async function joinRoom(req: Request, res: Response): Promise<void> {
       userId: roomsArray[0].users.length,
     };
 
-    const updatedRoom = await roomCollection.findOneAndUpdate(
-      { roomId: roomCode },
-      { $push: { users: newUser } as PushOperator<Document> },
-      {
-        returnDocument: "after",
-      }
-    );
-    console.log("Updated room:", updatedRoom!.value);
-
     const auth = JSON.stringify({
       user: newUser,
       roomId: roomCode,
@@ -235,7 +226,6 @@ export async function joinRoom(req: Request, res: Response): Promise<void> {
 
     res.status(200).json({
       message: "Room successfully joined!",
-      roomDetails: updatedRoom!.value,
     });
     return;
   } catch (error: unknown) {
