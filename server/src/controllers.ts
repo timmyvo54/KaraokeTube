@@ -145,11 +145,8 @@ export async function joinRoom(req: Request, res: Response): Promise<void> {
    * 403 - Password does not match room password.
    * 500 - External/unknown error.
    * 200 - Successful joins room.
+   * @auth - Contains details used the authenticate users.
    * @roomDetails - Contains information about the room the user is joining.
-   */
-
-  /**
-   * @todo Set user's cookie
    */
 
   try {
@@ -223,6 +220,18 @@ export async function joinRoom(req: Request, res: Response): Promise<void> {
       }
     );
     console.log("Updated room:", updatedRoom!.value);
+
+    const auth = JSON.stringify({
+      user: newUser,
+      roomId: roomCode,
+      password: password,
+    });
+    res.cookie("auth", auth, {
+      httpOnly: true,
+      secure: NODE_ENV !== "development",
+      sameSite: NODE_ENV === "development" ? "none" : "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     res.status(200).json({
       message: "Room successfully joined!",

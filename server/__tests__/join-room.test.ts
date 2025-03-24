@@ -28,43 +28,50 @@ describe("POST /api/join-room tests.", (): void => {
   beforeEach((): void => {
     const mockCollection = {
       find: jest.fn(() => ({
-        toArray: jest.fn().mockResolvedValue([{
-          roomId: roomCode,
-          roomName: "Test room name",
-          host: {
-            name: "hostName",
-            userId: 0
+        toArray: jest.fn().mockResolvedValue([
+          {
+            roomId: roomCode,
+            roomName: "Test room name",
+            host: {
+              name: "hostName",
+              userId: 0,
+            },
+            password: password,
+            users: [
+              {
+                name: "hostName",
+                userId: 0,
+              },
+            ],
+            currentVideo: null,
+            queue: [],
+            createdAt: new Date(),
           },
-          password: password,
-          users: [{
-            name: "hostName",
-            userId: 0
-          }],
-          currentVideo: null,
-          queue: [],
-          createdAt: new Date()
-        }]),
+        ]),
       })),
-      findOneAndUpdate: jest.fn().mockResolvedValue({ 
+      findOneAndUpdate: jest.fn().mockResolvedValue({
         value: {
           roomId: roomCode,
           roomName: "Test room name",
           host: {
             name: "hostName",
-            userId: 0
+            userId: 0,
           },
           password: password,
-          users: [{
-            name: "hostName",
-            userId: 0
-          }, {
-            name: name,
-            userId: 1
-          }],
+          users: [
+            {
+              name: "hostName",
+              userId: 0,
+            },
+            {
+              name: name,
+              userId: 1,
+            },
+          ],
           currentVideo: null,
           queue: [],
-          createdAt: new Date()
-        }
+          createdAt: new Date(),
+        },
       }),
     };
     const mockDb = {
@@ -236,7 +243,7 @@ describe("POST /api/join-room tests.", (): void => {
         const mockCollection = {
           find: jest.fn(() => ({
             toArray: jest.fn().mockResolvedValue([]),
-          }))
+          })),
         };
         const mockDb = {
           collection: jest.fn().mockReturnValue(mockCollection),
@@ -247,37 +254,39 @@ describe("POST /api/join-room tests.", (): void => {
           .send({
             name,
             roomCode,
-            password
+            password,
           });
         expect(response.statusCode).toBe(404);
         expect(response.body).toEqual({
-          message: "Room with code does not exist."
+          message: "Room with code does not exist.",
         });
-      })
+      });
       test("Should fail if password does not match.", async (): Promise<void> => {
         const mockCollection = {
           find: jest.fn(() => ({
-            toArray: jest.fn().mockResolvedValue([{
-              password: password
-            }]),
-          }))
+            toArray: jest.fn().mockResolvedValue([
+              {
+                password: password,
+              },
+            ]),
+          })),
         };
         const mockDb = {
           collection: jest.fn().mockReturnValue(mockCollection),
         };
         (connectToDatabase as jest.Mock).mockResolvedValue(mockDb);
         const response: SupertestResponse = await request(server)
-        .post("/api/join-room")
-        .send({
-          name,
-          roomCode,
-          password: "BadPassword123"
-        });
+          .post("/api/join-room")
+          .send({
+            name,
+            roomCode,
+            password: "BadPassword123",
+          });
         expect(response.statusCode).toBe(403);
         expect(response.body).toEqual({
           message: "Password does not match room password.",
-        })
-      })
+        });
+      });
     });
     describe("Unexpected errors", (): void => {
       test("Should fail if connectToDatabase fails.", async (): Promise<void> => {
@@ -298,9 +307,11 @@ describe("POST /api/join-room tests.", (): void => {
       test("Should fail if findOneAndUpdate fails.", async (): Promise<void> => {
         const mockCollection = {
           find: jest.fn(() => ({
-            toArray: jest.fn().mockResolvedValue([{
-              password: password
-            }]),
+            toArray: jest.fn().mockResolvedValue([
+              {
+                password: password,
+              },
+            ]),
           })),
           findOneAndUpdate: jest.fn().mockRejectedValue(new Error()),
         };
@@ -333,8 +344,14 @@ describe("POST /api/join-room tests.", (): void => {
           roomCode,
           password,
         });
+      const cookies = response.headers["set-cookie"];
+      const cookieArray = Array.isArray(cookies) ? cookies : [cookies];
+      const authCookie = cookieArray.find((cookie: string): boolean =>
+        cookie.startsWith("auth=")
+      );
       expect(consoleErrorSpy).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(200);
+      expect(authCookie).toBeDefined();
       expect(response.body).toEqual({
         message: "Room successfully joined!",
         roomDetails: {
@@ -342,20 +359,22 @@ describe("POST /api/join-room tests.", (): void => {
           roomName: "Test room name",
           host: {
             name: "hostName",
-            userId: 0
+            userId: 0,
           },
           password: password,
-          users: [{
-            name: "hostName",
-            userId: 0
-          },
-          {
-            name: name,
-            userId: 1
-          }],
+          users: [
+            {
+              name: "hostName",
+              userId: 0,
+            },
+            {
+              name: name,
+              userId: 1,
+            },
+          ],
           currentVideo: null,
           queue: [],
-          createdAt: expect.any(String)
+          createdAt: expect.any(String),
         },
       });
     });
