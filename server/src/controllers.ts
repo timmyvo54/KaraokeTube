@@ -103,9 +103,9 @@ export async function createRoom(req: Request, res: Response): Promise<void> {
     console.log("Room inserted with ID:", result.insertedId);
 
     const auth = JSON.stringify({
-      hostUser,
-      newRoomId,
-      password,
+      user: hostUser,
+      roomId: newRoomId,
+      password: password,
     });
     res.cookie("auth", auth, {
       httpOnly: true,
