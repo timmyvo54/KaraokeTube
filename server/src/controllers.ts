@@ -238,52 +238,6 @@ export async function joinRoom(req: Request, res: Response): Promise<void> {
 }
 
 /**
- * Verifies that room exists.
- * @param {Request} req - The request object
- * @param {Response} res - The response object
- * @returns A promise that resolves to void
- */
-export async function verifyRoomExists(
-  req: Request,
-  res: Response
-): Promise<void> {
-  try {
-    /**
-     * @roomCode - The unique identifying code of the room.
-     * @responses
-     * 404 - Room code does not exist.
-     * 500 - External/unknown error.
-     * 200 - Room code exists.
-     */
-    const roomCode = req.query.roomCode as string;
-
-    // Connect to database
-    const db = await connectToDatabase("karaoke_tube");
-    const roomCollection = db.collection("rooms");
-
-    // Check that room code exists
-    const roomsArray = await roomCollection
-      .find({ roomId: roomCode })
-      .toArray();
-    if (roomsArray.length === 0) {
-      res.status(404).json({
-        message: "Room with code does not exist.",
-      });
-    } else {
-      res.status(200).json({
-        message: "Room exists.",
-      });
-    }
-    return;
-  } catch (error: unknown) {
-    res.status(500).json({
-      message: "Unknown error encountered while verifying room details.",
-    });
-    return;
-  }
-}
-
-/**
  * Handles the handshake between the client and server.
  * @param {Request} req - The request object
  * @param {Response} res - The response object
@@ -307,7 +261,9 @@ export async function handshake(req: Request, res: Response): Promise<void> {
       return;
     }
     const { hostUser, newRoomId, password } = JSON.parse(authCookie);
-    if (!hostUser || !newRoomId || !password) {
+    if (!hostUser ||
+        !newRoomId ||
+        !password) {
       res.status(401).json({
         message: "Cookie does not contain all necessary information.",
       });
@@ -363,6 +319,6 @@ export async function handshake(req: Request, res: Response): Promise<void> {
  * @param {Response} res - The response object
  * @returns A promise that resolves to void
  */
-export async function exitRoom(req: Request, res: Response): Promise<void> {
+export async function leaveRoom(req: Request, res: Response): Promise<void> {
   // @todo Implement
 }
