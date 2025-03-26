@@ -7,9 +7,9 @@ import { NODE_ENV } from "./config";
 
 /**
  * Creates a room given room details.
- * @param {Request} req - The request object
- * @param {Response} res - The response object
- * @returns A promise that resolves to void
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * @returns A promise that resolves to void.
  */
 export async function createRoom(req: Request, res: Response): Promise<void> {
   /**
@@ -130,9 +130,9 @@ export async function createRoom(req: Request, res: Response): Promise<void> {
 
 /**
  * Joins a room given room details.
- * @param {Request} req - The request object
- * @param {Response} res - The response object
- * @returns A promise that resolves to void
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * @returns A promise that resolves to void.
  */
 export async function joinRoom(req: Request, res: Response): Promise<void> {
   /**
@@ -239,15 +239,15 @@ export async function joinRoom(req: Request, res: Response): Promise<void> {
 
 /**
  * Handles the handshake between the client and server.
- * @param {Request} req - The request object
- * @param {Response} res - The response object
- * @returns A promise that resolves to void
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * @returns A promise that resolves to void.
  */
 export async function handshake(req: Request, res: Response): Promise<void> {
   /**
    * @authCookie - The information contained required to establish a handshake.
    * @responses
-   * 401 - Authentication cookie does not exist
+   * 401 - Authentication cookie does not exist.
    * 500 - External/unknown error.
    * 200 - Connection successfully established.
    */
@@ -261,9 +261,7 @@ export async function handshake(req: Request, res: Response): Promise<void> {
       return;
     }
     const { hostUser, newRoomId, password } = JSON.parse(authCookie);
-    if (!hostUser ||
-        !newRoomId ||
-        !password) {
+    if (!hostUser || !newRoomId || !password) {
       res.status(401).json({
         message: "Cookie does not contain all necessary information.",
       });
