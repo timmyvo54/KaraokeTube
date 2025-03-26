@@ -1,11 +1,34 @@
-import app from "./app"; // Import your Express app
-import { Server } from "http"; // Import http.Server type
+import http, { Server as HTTPServer } from "http";
+import { Server as IOServer, Socket } from "socket.io";
+import app from "./app";
+import { NODE_ENV } from "./config";
 
-let server: Server;
+let server: HTTPServer;
+let io: IOServer;
 
-export function startServer(port: number): Server {
-  server = app.listen(port, () => {
-    console.log(`The server is running on port ${port}`);
+export function startServer(port: number): HTTPServer {
+  server = http.createServer(app);
+
+  io = new IOServer(server, {
+    cors:
+      NODE_ENV === "development"
+        ? {
+            origin: "http://localhost:5173",
+            credentials: true,
+          }
+        : undefined,
+  });
+
+  io.on("connection", (socket: Socket): void => {
+    console.log(`Socket connected: ${socket.id}`);
+
+    socket.on("disconnect", (): void => {
+      console.log(`Socket disconnected: ${socket.id}`);
+    });
+  });
+
+  server.listen(port, (): void => {
+    console.log(`The server is listening on port ${port}`);
   });
   return server;
 }

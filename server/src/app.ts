@@ -1,23 +1,18 @@
 import express, { Express } from "express";
 import cookieParser from "cookie-parser";
-import routes from "./routes";
 import cors from "cors";
+import routes from "./routes";
 import { NODE_ENV } from "./config";
 
 const app: Express = express();
 
-/**
- * @TODO reconfigure server to allow websocket support
- * @TODO add basic connection and disconnection logic
- */
-
-const PORT = 25565;
-
 if (NODE_ENV === "development") {
-  app.use(cors({
-    origin: "http://localhost:5173",
-    credentials: true
-  }));
+  app.use(
+    cors({
+      origin: "http://localhost:5173",
+      credentials: true,
+    })
+  );
 } else {
   console.log("CORS not enabled for production.");
 }
