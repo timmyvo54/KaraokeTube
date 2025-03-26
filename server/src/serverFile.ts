@@ -40,3 +40,7 @@ export function stopServer(done: () => void): void {
     done();
   }
 }
+
+export function getIO(): IOServer {
+  return io;
+}

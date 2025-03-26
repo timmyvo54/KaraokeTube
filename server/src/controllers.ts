@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { connectToDatabase } from "./database";
 import { Room, User } from "./interfaces";
 import { generateRoomId } from "./utils";
-import { PushOperator } from "mongodb";
 import { NODE_ENV } from "./config";
 
 /**
@@ -253,15 +252,14 @@ export async function handshake(req: Request, res: Response): Promise<void> {
    */
   try {
     const authCookie: string = req.cookies.auth as string;
-    console.log(authCookie);
     if (!authCookie) {
       res.status(401).json({
         message: "Authentication cookie does not exist.",
       });
       return;
     }
-    const { hostUser, newRoomId, password } = JSON.parse(authCookie);
-    if (!hostUser || !newRoomId || !password) {
+    const { user, roomId, password } = JSON.parse(authCookie);
+    if (!user || !roomId || !password) {
       res.status(401).json({
         message: "Cookie does not contain all necessary information.",
       });
@@ -270,9 +268,7 @@ export async function handshake(req: Request, res: Response): Promise<void> {
     // Check that newRoomId exists and if it does, check the password
     const db = await connectToDatabase("karaoke_tube");
     const roomCollection = db.collection("rooms");
-    const roomsArray = await roomCollection
-      .find({ roomId: newRoomId })
-      .toArray();
+    const roomsArray = await roomCollection.find({ roomId: roomId }).toArray();
     // Check that room exists
     if (roomsArray.length === 0) {
       res.status(404).json({
@@ -290,8 +286,7 @@ export async function handshake(req: Request, res: Response): Promise<void> {
     // Check that user with id does not already exist in the room
     if (
       roomsArray[0].users.some(
-        (user: { name: string; userId: number }) =>
-          user.userId == hostUser.userId
+        (user: { name: string; userId: number }) => user.userId == user.userId
       )
     ) {
       res.status(401).json({
