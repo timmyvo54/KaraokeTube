@@ -1,17 +1,15 @@
 import { ChangeEvent, useState, useEffect } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
-import { RoomData, JoinData } from "../other/interfaces";
+import { CreateRoomData, JoinRoomData } from "../other/interfaces";
 
 function Home(): JSX.Element {
-  const navigate: NavigateFunction = useNavigate();
-
-  const [createRoomData, setCreateRoomData] = useState<RoomData>({
+  const [createRoomData, setCreateRoomData] = useState<CreateRoomData>({
     room_name: "",
     host_name: "",
     create_room_password: "",
   });
 
-  const [joinData, setJoinData] = useState<JoinData>({
+  const [joinRoomData, setjoinRoomData] = useState<JoinRoomData>({
     user_name: "",
     room_code: "",
     join_room_password: "",
@@ -19,6 +17,8 @@ function Home(): JSX.Element {
 
   const [createRoomDataIsFilled, setCreateRoomDataIsFilled] = useState<boolean>(false);
   const [joinRoomDataIsFilled, setJoinRoomDataIsFilled] = useState<boolean>(false);
+
+  const navigate: NavigateFunction = useNavigate();
 
   function handleCreateRoomChange(e: ChangeEvent<HTMLInputElement>): void {
     const { id, value } = e.target; // Captures the element being changed
@@ -28,29 +28,31 @@ function Home(): JSX.Element {
     });
   }
 
-  useEffect(() => {
-    setCreateRoomDataIsFilled(checkRoomData(createRoomData));
-  }, [createRoomData]);
-
-  function checkRoomData(data: RoomData): boolean {
-    return data.room_name !== "" && data.host_name !== "" && data.create_room_password !== "";
-  }
-
   function handleJoinRoomChange(e: ChangeEvent<HTMLInputElement>): void {
     const { id, value } = e.target; // Captures the element being changed
-    setJoinData({
-      ...joinData, // Keeps the previous data
+    setjoinRoomData({
+      ...joinRoomData, // Keeps the previous data
       [id]: value // Sets the field to the new data
     });
   }
 
-  useEffect(() => {
-    setJoinRoomDataIsFilled(checkJoinData(joinData));
-  }, [joinData]);
+  // Returns true if all fields required for creating a room are filled in, otherwise returns false.
+  function checkCreateRoomData(data: CreateRoomData): boolean {
+    return data.room_name !== "" && data.host_name !== "" && data.create_room_password !== "";
+  }
 
-  function checkJoinData(data: JoinData): boolean {
+  useEffect(() => {
+    setCreateRoomDataIsFilled(checkCreateRoomData(createRoomData));
+  }, [createRoomData]);
+
+  // Returns true if all fields required for joining a room are filled in, otherwise returns false.
+  function checkJoinRoomData(data: JoinRoomData): boolean {
     return data.user_name !== "" && data.room_code !== "" && data.join_room_password !== "";
   }
+
+  useEffect(() => {
+    setJoinRoomDataIsFilled(checkJoinRoomData(joinRoomData));
+  }, [joinRoomData]);
 
   async function handleCreateRoom() {
     if (createRoomDataIsFilled) {
@@ -70,9 +72,6 @@ function Home(): JSX.Element {
         if (response.ok) {
           const data = await response.json();
           console.log(`Room created with ID: ${data.roomDetails.roomId}`);
-          /**
-           * @todo Implement navigation
-           */
           navigate(`/room/${data.roomDetails.roomId}`);
         } else {
           const error = await response.json();
@@ -94,22 +93,21 @@ function Home(): JSX.Element {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            name: joinData.user_name,
-            roomCode: joinData.room_code,
-            password: joinData.join_room_password})
+            name: joinRoomData.user_name,
+            roomCode: joinRoomData.room_code,
+            password: joinRoomData.join_room_password})
         });
 
         if (response.ok) {
           const data = await response.json();
           console.log(`Room joined with ID: ${data.roomDetails.roomId}`);
-          // Implement navigation
-          // navigate(`/rooms/${data.roomDetails.roomId}`);
+          navigate(`/rooms/${data.roomDetails.roomId}`);
         } else {
           const error = await response.json();
           alert(`Error: ${error.message}`);
         }
       } catch (error: unknown) {
-        console.error("Error while creating room:", error);
+        console.error("Error while joining room:", error);
         alert("An unexpected error has occurred.");
       }
     }
@@ -165,7 +163,7 @@ function Home(): JSX.Element {
         >
           <input
             id="user_name"
-            value={joinData.user_name}
+            value={joinRoomData.user_name}
             onChange={handleJoinRoomChange}
             type="text"
             placeholder="Your Name"
@@ -173,7 +171,7 @@ function Home(): JSX.Element {
           />
           <input
             id="room_code"
-            value={joinData.room_code}
+            value={joinRoomData.room_code}
             onChange={handleJoinRoomChange}
             type="text"
             placeholder="Room Code"
@@ -181,7 +179,7 @@ function Home(): JSX.Element {
           />
           <input
             id="join_room_password"
-            value={joinData.join_room_password}
+            value={joinRoomData.join_room_password}
             onChange={handleJoinRoomChange}
             type="text"
             placeholder="Room Password"

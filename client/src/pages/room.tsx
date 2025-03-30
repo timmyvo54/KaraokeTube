@@ -1,12 +1,12 @@
 import { ChangeEvent, useState, useEffect} from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
-import { RoomData, JoinData } from "./home";
+import { CreateRoomData, JoinRoomData, User } from "../other/interfaces";
 import Player from "../other/youtube";
 import VideoData from "../other/video-data";
 
 export interface QueuedVideo extends Video {
-  added_by: string;
+  added_by: User;
 }
 
 interface Video {
@@ -19,7 +19,7 @@ interface YoutubeSearchItem {
   [key: string]: any
 }
 
-function Room({CurrentRoomData}: {CurrentRoomData: RoomData | JoinData}) {
+function Room({CurrentRoomData}: {CurrentRoomData: CreateRoomData | JoinRoomData}) {
   const navigate = useNavigate();
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
