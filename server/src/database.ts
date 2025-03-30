@@ -6,15 +6,15 @@ let db: Db;
 
 export async function connectToDatabase(dbName: string): Promise<Db> {
   try {
-    client = new MongoClient(DATABASE_URL);
-    await client.connect();
-    console.log("Connected to MongoDB!");
+    if (!db) {
+      client = new MongoClient(DATABASE_URL);
+      await client.connect();
+      console.log("Connected to MongoDB!");
+      db = client.db(dbName);
+    }
   } catch (error: unknown) {
     console.error("Failed to connect to MongoDB.", error);
     throw error;
-  }
-  if (!db) {
-    db = client.db(dbName);
   }
   return db;
 }

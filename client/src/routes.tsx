@@ -1,6 +1,6 @@
 import Layout from "./other/layout";
 import App from "./App";
-import Room from "./pages/room";
+import NewRoom from "./pages/new-room";
 
 const routes = [
   {
@@ -13,7 +13,7 @@ const routes = [
       },
       {
         path: "room/:id",
-        element: <Room />
+        element: <NewRoom />
       }
     ]
   }

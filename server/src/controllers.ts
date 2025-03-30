@@ -109,7 +109,7 @@ export async function createRoom(req: Request, res: Response): Promise<void> {
     res.cookie("auth", auth, {
       httpOnly: true,
       secure: NODE_ENV !== "development",
-      sameSite: NODE_ENV === "development" ? "none" : "strict",
+      sameSite: NODE_ENV === "development" ? "lax" : "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -219,7 +219,7 @@ export async function joinRoom(req: Request, res: Response): Promise<void> {
     res.cookie("auth", auth, {
       httpOnly: true,
       secure: NODE_ENV !== "development",
-      sameSite: NODE_ENV === "development" ? "none" : "strict",
+      sameSite: NODE_ENV === "development" ? "lax" : "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -246,12 +246,18 @@ export async function handshake(req: Request, res: Response): Promise<void> {
   /**
    * @authCookie - The information contained required to establish a handshake.
    * @responses
-   * 401 - Authentication cookie does not exist.
+   * 401 - Input is invalid.
    * 500 - External/unknown error.
    * 200 - Connection successfully established.
    */
   try {
+    const { roomCode } = req.body;
     const authCookie: string = req.cookies.auth as string;
+    if (!roomCode) {
+      res.status(401).json({
+        message: "Room code does not exist.",
+      });
+    }
     if (!authCookie) {
       res.status(401).json({
         message: "Authentication cookie does not exist.",
@@ -264,6 +270,11 @@ export async function handshake(req: Request, res: Response): Promise<void> {
         message: "Cookie does not contain all necessary information.",
       });
       return;
+    }
+    if (roomId != roomCode) {
+      res.status(401).json({
+        message: "Mismatched room code.",
+      });
     }
     // Check that newRoomId exists and if it does, check the password
     const db = await connectToDatabase("karaoke_tube");
