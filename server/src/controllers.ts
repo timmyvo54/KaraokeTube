@@ -257,6 +257,7 @@ export async function handshake(req: Request, res: Response): Promise<void> {
       res.status(401).json({
         message: "Room code does not exist.",
       });
+      return;
     }
     if (!authCookie) {
       res.status(401).json({
@@ -264,6 +265,11 @@ export async function handshake(req: Request, res: Response): Promise<void> {
       });
       return;
     }
+    /**
+     * @TODO Check user fields
+     * @TODO Check if fields are not empty
+     * @TODO Check if user fields are not empty
+     */
     const { user, roomId, password } = JSON.parse(authCookie);
     if (!user || !roomId || !password) {
       res.status(401).json({
@@ -275,6 +281,7 @@ export async function handshake(req: Request, res: Response): Promise<void> {
       res.status(401).json({
         message: "Mismatched room code.",
       });
+      return;
     }
     // Check that newRoomId exists and if it does, check the password
     const db = await connectToDatabase("karaoke_tube");
