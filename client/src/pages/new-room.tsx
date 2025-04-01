@@ -1,7 +1,12 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, NavigateFunction, useNavigate } from "react-router-dom";
+import { io, Socket } from "socket.io-client";
+
+let socket: Socket;
 
 function NewRoom(): JSX.Element {
+
+  const [connected, setConnected] = useState<boolean>(false);
 
   const { id } = useParams<{ id: string }>();
 
@@ -31,6 +36,8 @@ function NewRoom(): JSX.Element {
          * @TODO Handle real time updates
          */
 
+        socket = io("http://localhost:25565");
+
       } catch (error: unknown) {
         console.error(error);
         alert("Unexpected error while joining room.");
@@ -39,13 +46,25 @@ function NewRoom(): JSX.Element {
     }
 
     enterRoom();
+
+    
+
   }, [id, navigate]);
 
   return (
     <>
-      <div>
-        <span>This is new room</span>
-      </div>
+      { connected ? 
+          <div>
+            <span>This is new room</span>
+          </div>
+        :
+          <>
+            <div className="flex flex-grow"></div>
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          </>
+      }
     </>
   );
 }

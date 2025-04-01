@@ -272,7 +272,7 @@ export async function handshake(req: Request, res: Response): Promise<void> {
       });
       return;
     }
-    if (!user.name || !user.userId) {
+    if (!user.name || user.userId === undefined || user.userId === null) {
       res.status(401).json({
         message: "Cookie does not contain user information.",
       });

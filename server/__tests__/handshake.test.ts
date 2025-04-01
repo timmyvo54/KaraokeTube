@@ -24,7 +24,7 @@ describe("POST /api/handshake tests.", (): void => {
   const authCookie = JSON.stringify({
     user: {
       name: "Jacob",
-      userId: "1"
+      userId: 1
     },
     roomId: "SEBO",
     password: "qwerty4"
