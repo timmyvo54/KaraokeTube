@@ -89,6 +89,25 @@ describe("POST /api/handshake tests.", (): void => {
           message: "Cookie does not contain all necessary information."
         });
       });
+      test("Should fail if user in cookie does not have all necessary information.", async (): Promise<void> => {
+        const badCookie = JSON.stringify({
+          user: {
+            userId: "1"
+          },
+          roomId: "SEBO",
+          password: "qwerty4"
+        })
+        const response: SupertestResponse = await request(server)
+          .post("/api/handshake")
+          .set("Cookie", `auth=${badCookie}`)
+          .send({
+            roomCode
+          });
+        expect(response.statusCode).toBe(401);
+        expect(response.body).toEqual({
+          message: "Cookie does not contain user information."
+        });
+      });
       test("Should fail if room ID from cookie does not match room code.", async (): Promise<void> => {
         const badRoomCode = "OHNO";
         const response: SupertestResponse = await request(server)

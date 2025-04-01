@@ -265,15 +265,16 @@ export async function handshake(req: Request, res: Response): Promise<void> {
       });
       return;
     }
-    /**
-     * @TODO Check user fields
-     * @TODO Check if fields are not empty
-     * @TODO Check if user fields are not empty
-     */
     const { user, roomId, password } = JSON.parse(authCookie);
     if (!user || !roomId || !password) {
       res.status(401).json({
         message: "Cookie does not contain all necessary information.",
+      });
+      return;
+    }
+    if (!user.name || !user.userId) {
+      res.status(401).json({
+        message: "Cookie does not contain user information.",
       });
       return;
     }
