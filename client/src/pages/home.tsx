@@ -89,6 +89,7 @@ function Home(): JSX.Element {
       try {
         const response: Response = await fetch("http://localhost:25565/api/join-room", {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json"
           },
@@ -99,9 +100,8 @@ function Home(): JSX.Element {
         });
 
         if (response.ok) {
-          const data = await response.json();
-          console.log(`Room joined with ID: ${data.roomDetails.roomId}`);
-          navigate(`/rooms/${data.roomDetails.roomId}`);
+          console.log(`Room joined with ID: ${joinRoomData.room_code}`);
+          navigate(`/room/${joinRoomData.room_code}`);
         } else {
           const error = await response.json();
           alert(`Error: ${error.message}`);

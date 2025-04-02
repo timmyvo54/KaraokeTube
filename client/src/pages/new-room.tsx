@@ -36,7 +36,18 @@ function NewRoom(): JSX.Element {
          * @TODO Handle real time updates
          */
 
-        socket = io("http://localhost:25565");
+        socket = io("http://localhost:25565", {
+          withCredentials: true,
+          auth: {
+            roomCode: id
+          }
+        });
+
+        socket.on("connect", (): void => {
+          setConnected(true);
+          console.log("Connected to WebSocket server.");
+          socket.emit("join-room", { roomCode: id });
+        })
 
       } catch (error: unknown) {
         console.error(error);
@@ -46,8 +57,6 @@ function NewRoom(): JSX.Element {
     }
 
     enterRoom();
-
-    
 
   }, [id, navigate]);
 
