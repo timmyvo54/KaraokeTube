@@ -20,16 +20,18 @@ export function startServer(port: number): HTTPServer {
           }
         : undefined,
   });
-  
+
   io.use(async (socket, next) => {
     try {
       const cookies = socket.handshake.headers.cookie;
       const roomCode = socket.handshake.auth.roomCode;
       if (!cookies) {
         console.log("No cookies found.");
-        return next(new Error("Authentication required to connect to WebSocket."));
+        return next(
+          new Error("Authentication required to connect to WebSocket.")
+        );
       }
-      
+
       const parsedCookies = cookie.parse(cookies);
       const authCookie = parsedCookies.auth;
 
@@ -41,7 +43,9 @@ export function startServer(port: number): HTTPServer {
       const { user, roomId, password } = JSON.parse(authCookie);
       if (!user || !roomId || !password) {
         console.log("Cookie does not contain all necessary information.");
-        return next(new Error("Cookie does not contain all necessary information."));
+        return next(
+          new Error("Cookie does not contain all necessary information.")
+        );
       }
       if (!user.name || user.userId === undefined || user.userId === null) {
         console.log("Cookie does not contain user information.");
@@ -54,7 +58,9 @@ export function startServer(port: number): HTTPServer {
       // Check that newRoomId exists and if it does, check the password
       const db = await connectToDatabase("karaoke_tube");
       const roomCollection = db.collection("rooms");
-      const roomsArray = await roomCollection.find({ roomId: roomId }).toArray();
+      const roomsArray = await roomCollection
+        .find({ roomId: roomId })
+        .toArray();
       // Check that room exists
       if (roomsArray.length === 0) {
         console.log("Room with code does not exist.");
@@ -68,28 +74,50 @@ export function startServer(port: number): HTTPServer {
       // Check that user with id does not already exist in the room
       if (
         roomsArray[0].users.some(
-          (user: { name: string; userId: number }) => user.userId == user.userId
+          (userInRoom: { name: string; userId: number }) =>
+            userInRoom.userId == user.userId
         )
       ) {
         console.log("User already exists in room.");
         return next(new Error("User already exists in room."));
       }
 
+      socket.data.user = user;
+      socket.data.roomId = roomId;
+
       console.log(`Authenticated socket: ${socket.id}.`);
       next();
     } catch (error: unknown) {
-      console.error("Unexpected error while authenticating WebSocket connection.");
-      return next(new Error("Unexpected error while authenticating WebSocket connection."));
+      console.error(
+        "Unexpected error while authenticating WebSocket connection."
+      );
+      return next(
+        new Error("Unexpected error while authenticating WebSocket connection.")
+      );
     }
   });
 
   io.on("connection", (socket: Socket): void => {
     console.log(`Socket connected: ${socket.id}`);
 
-    socket.on("join-room", ({ roomCode }) => {
-      socket.join(roomCode);
-      console.log(`User ${socket.id} joined room ${roomCode}.`);
-    })
+    socket.on("join-room", async ({ roomCode }) => {
+      try {
+        const { user, roomId } = socket.data;
+
+        const db = await connectToDatabase("karaoke_tube");
+        const roomCollection = db.collection("rooms");
+
+        await roomCollection.updateOne(
+          { roomId: roomId },
+          { $addToSet: { users: user } }
+        );
+
+        socket.join(roomCode);
+        console.log(`User ${socket.id} joined room ${roomCode}.`);
+      } catch (error: unknown) {
+        console.error("Failed to join room: ", error);
+      }
+    });
 
     socket.on("disconnect", (): void => {
       console.log(`Socket disconnected: ${socket.id}`);

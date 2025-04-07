@@ -305,7 +305,8 @@ export async function handshake(req: Request, res: Response): Promise<void> {
     // Check that user with id does not already exist in the room
     if (
       roomsArray[0].users.some(
-        (user: { name: string; userId: number }) => user.userId == user.userId
+        (userInRoom: { name: string; userId: number }) =>
+          userInRoom.userId == user.userId
       )
     ) {
       res.status(401).json({
