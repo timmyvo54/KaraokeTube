@@ -1,9 +1,11 @@
 import http, { Server as HTTPServer } from "http";
 import { Server as IOServer, Socket } from "socket.io";
 import * as cookie from "cookie";
+import { Collection } from "mongodb";
 import app from "./app";
 import { NODE_ENV } from "./config";
 import { connectToDatabase } from "./database";
+import { Room } from "./interfaces";
 
 let server: HTTPServer;
 let io: IOServer;
@@ -116,6 +118,31 @@ export function startServer(port: number): HTTPServer {
         console.log(`User ${socket.id} joined room ${roomCode}.`);
       } catch (error: unknown) {
         console.error("Failed to join room: ", error);
+      }
+    });
+
+    socket.on("leave-room", async ({ roomCode }) => {
+      try {
+        const { user, roomId } = socket.data;
+
+        const db = await connectToDatabase("karaoke_tube");
+        const roomCollection: Collection<Room> = db.collection("rooms");
+
+        await roomCollection.updateOne(
+          { roomId: roomId },
+          {
+            $pull: {
+              users: { userId: user.userId },
+            },
+          }
+        );
+
+        socket.leave(roomCode);
+        console.log(
+          `User ${user.name} with ID ${user.userId} (${socket.id}) left room ${roomCode}.`
+        );
+      } catch (error: unknown) {
+        console.error("Failed to leave room: ", error);
       }
     });
 

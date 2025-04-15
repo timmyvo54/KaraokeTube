@@ -1,18 +1,45 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, NavigateFunction, useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 
-let socket: Socket;
-
 function NewRoom(): JSX.Element {
 
-  const [connected, setConnected] = useState<boolean>(false);
+  const socketRef = useRef<Socket | null>(null);
+
+  const connectedRef = useRef<boolean>(false);
+
+  const [isConnected, setIsConnected] = useState<boolean>(false);
 
   const { id } = useParams<{ id: string }>();
 
   const navigate: NavigateFunction = useNavigate();
 
-  useEffect((): void => {
+  useEffect(() => {
+    async function connectSocket(id: string): Promise<Socket> {
+
+      const socket: Socket = io("http://localhost:25565", {
+        withCredentials: true,
+        auth: { roomCode: id }
+      });
+
+      socketRef.current = socket;
+
+      return new Promise((resolve, reject) => {
+
+        socket.on("connect", () => {
+          console.log("Connected to WebSocket server.");
+          socket.emit("join-room", { roomCode: id });
+          setIsConnected(true);
+          resolve(socket);
+        });
+
+        socket.on("connect_error", (error) => {
+          console.error("Socket connection failed: ", error);
+          reject(error);
+        });
+      });
+    }
+
     async function enterRoom(): Promise<void> {
       try {
         const response: Response = await fetch("http://localhost:25565/api/handshake", {
@@ -30,24 +57,8 @@ function NewRoom(): JSX.Element {
           navigate("/");
         }
 
-        /**
-         * @TODO Connect to socket.io
-         * @TODO Emit join room event
-         * @TODO Handle real time updates
-         */
-
-        socket = io("http://localhost:25565", {
-          withCredentials: true,
-          auth: {
-            roomCode: id
-          }
-        });
-
-        socket.on("connect", (): void => {
-          setConnected(true);
-          console.log("Connected to WebSocket server.");
-          socket.emit("join-room", { roomCode: id });
-        })
+        const socket: Socket = await connectSocket(id!);
+        socketRef.current = socket;
 
       } catch (error: unknown) {
         console.error(error);
@@ -56,13 +67,69 @@ function NewRoom(): JSX.Element {
       }
     }
 
+    function handleUnload(): void {
+      console.log("Unload event triggered.");
+      if (socketRef.current) {
+        socketRef.current.emit("leave-room", { roomCode: id });
+        socketRef.current.disconnect();
+        console.log("Socket disconnected.");
+      }
+    }
+
+    function handleVisibilityChange(): void {
+      console.log("Visibility change event triggered.");
+      if (socketRef.current) {
+        socketRef.current.emit("leave-room", { roomCode: id });
+        socketRef.current.disconnect();
+        console.log("Socket disconnected.");
+      }
+    }
+
+    function handlePageHide(): void {
+      console.log("Page hide event triggered.");
+      if (socketRef.current) {
+        socketRef.current.emit("leave-room", { roomCode: id });
+        socketRef.current.disconnect();
+        console.log("Socket disconnected.");
+      }
+    }
+
+    if (connectedRef.current) return;
+    connectedRef.current = true;
+
+    window.addEventListener("unload", handleUnload);
+    document.addEventListener("visibilityChange", handleVisibilityChange);
+    window.addEventListener("pagehide", handlePageHide);
+
     enterRoom();
+
+    return () => {
+      console.log("Cleaning up room...");
+      if (socketRef.current) {
+        console.log("Socket still exists, disconnecting...");
+        socketRef.current.disconnect();
+        console.log("Socket disconnected.");
+      } else {
+        console.warn("No socket found on cleanup.");
+      }
+      window.removeEventListener("unload", handleUnload);
+      document.removeEventListener("visibilityChange", handleVisibilityChange);
+      window.removeEventListener("pagehide", handlePageHide);
+    }
 
   }, [id, navigate]);
 
+  useEffect(() => {
+    console.log("Room component mounted");
+    return () => {
+      socketRef.current?.disconnect();
+      console.log("Room component unmounted");
+    };
+  }, []);  
+
   return (
     <>
-      { connected ? 
+      { isConnected ? 
           <div>
             <span>This is new room</span>
           </div>

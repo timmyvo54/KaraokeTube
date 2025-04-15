@@ -208,7 +208,12 @@ export async function joinRoom(req: Request, res: Response): Promise<void> {
 
     const newUser: User = {
       name: name,
-      userId: roomsArray[0].users.length,
+      userId:
+        roomsArray[0].users.length > 0
+          ? Math.max(
+              roomsArray[0].users.map((user: { userId: number }) => user.userId)
+            ) + 1
+          : 0,
     };
 
     const auth = JSON.stringify({
