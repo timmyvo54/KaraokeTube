@@ -72,7 +72,7 @@ function Home(): JSX.Element {
         if (response.ok) {
           const data = await response.json();
           console.log(`Room created with ID: ${data.roomDetails.roomId}`);
-          navigate(`/room/${data.roomDetails.roomId}`);
+          navigate(`/room/${data.roomDetails.roomId}`, { state: { isHost: true, name: createRoomData.host_name }});
         } else {
           const error = await response.json();
           alert(`Error: ${error.message}`);
@@ -101,7 +101,7 @@ function Home(): JSX.Element {
 
         if (response.ok) {
           console.log(`Room joined with ID: ${joinRoomData.room_code}`);
-          navigate(`/room/${joinRoomData.room_code}`);
+          navigate(`/room/${joinRoomData.room_code}`, { state: { isHost: false, name: joinRoomData.user_name }});
         } else {
           const error = await response.json();
           alert(`Error: ${error.message}`);

@@ -14,3 +14,14 @@ export interface User {
   name: string;
   user_id: number;
 }
+
+export interface SearchedVideo {
+  url: string;
+  thumbnail: string;
+  title: string;
+  id: string;
+}
+
+export interface QueuedVideo extends SearchedVideo {
+  added_by: string;
+}

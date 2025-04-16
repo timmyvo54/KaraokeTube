@@ -1,8 +1,12 @@
-import { useState, useEffect, useRef } from "react";
-import { useParams, NavigateFunction, useNavigate } from "react-router-dom";
+import { ChangeEvent, useState, useEffect, useRef } from "react";
+import { useParams, NavigateFunction, useNavigate, useLocation } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
+import { QueuedVideo, SearchedVideo } from "../other/interfaces";
 
 function NewRoom(): JSX.Element {
+
+  const location = useLocation();
+  const { isHost, name } = location.state || {};
 
   const socketRef = useRef<Socket | null>(null);
 
@@ -125,13 +129,124 @@ function NewRoom(): JSX.Element {
       socketRef.current?.disconnect();
       console.log("Room component unmounted");
     };
-  }, []);  
+  }, []);
+
+  const [searchData, setSearchData] = useState<string>("");
+  const [searchDataMobile, setSearchDataMobile] = useState<string>("");
+
+  function handleSearchChange(e: ChangeEvent<HTMLInputElement>): void {
+    const { value } = e.target;
+    setSearchData(value);
+  }
+
+  function handleEnter(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      handleSubmit(searchData);
+    }
+  }
+
+  const [searchedVideos, setSearchedVideos] = useState<SearchedVideo[]>([]);
+
+  function handleSubmit(data: string) {
+    if (data.length != 0) {
+      console.log(data);
+      searchYoutube(data);
+      setSearchData("");
+    }
+  }
+  
+  async function searchYoutube(query: string) {
+    const API_KEY = import.meta.env.VITE_YOUTUBE_KEY;
+    const BASE_URL = "https://www.googleapis.com/youtube/v3/search";
+    const params = new URLSearchParams({
+      part: "snippet",
+      q: `${query.trim()} karaoke`,
+      maxResults: "25",
+      type: "video",
+      key: API_KEY
+    });
+    const response: Response = await fetch(`${BASE_URL}?${params}`);
+    const data = await response.json();
+    setSearchedVideos(data.items.map((item: { id: { videoId: any; }; snippet: { thumbnails: { high: { url: any; }; }; title: any; }; }) => {
+      return {
+        url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
+        thumbnail: item.snippet.thumbnails.high.url,
+        title: item.snippet.title,
+        id: item.id.videoId
+      }
+    }));
+    // url: string;
+    // thumbnail: string;
+    // title: string;
+    console.log(data);
+  }
+
+  const [hoveredSearchedVideo, setHoveredSearchedVideo] = useState<string | null>(null);
+  const [queuedVideos, setQueuedVideos] = useState<QueuedVideo[]>([]);
+  const [hoveredQueuedVideo, setHoveredQueuedVideo] = useState<string | null>(null);
+
+  // const [curVideo, setCurVideo] = useState< | null>(null);
 
   return (
     <>
-      { isConnected ? 
-          <div>
-            <span>This is new room</span>
+      { isConnected && isHost ? 
+          <div className="flex flex-grow w-full justify-evenly my-4">
+            <div id="video" className="flex flex-col flex-[2] max-w-[50%]">
+              <span className="text-xl self-center">Video</span>
+            </div>
+            <div id="queue" className="flex flex-col max-w-[25%] flex-1" >
+              <span className="text-xl self-center">Queue</span>
+              <div id="queued" className="flex-col text-xl overflow-y-scroll m-4" style={{maxHeight: "80vh"}}>
+                {queuedVideos.map((video) => {
+                    return (
+                      <div
+                        className="flex flex-col"
+                        key={video.id}
+                        onMouseEnter={() => setHoveredQueuedVideo(video.id)}
+                        onMouseLeave={() => setHoveredQueuedVideo(null)}
+                      >
+                        <img src={video.thumbnail} alt={video.title} />
+                        <span className={hoveredQueuedVideo === video.id ? "" : "truncate"}>
+                          {`${video.title}\nAdded by: ${video.added_by}`}
+                        </span>
+                      </div>
+                    )
+                  })}
+              </div>
+            </div>
+            <div id="search" className="flex flex-1 flex-col max-w-[25%]">
+              <input id="search_bar_desktop"
+                onKeyDown={handleEnter}
+                value={searchData}
+                onChange={handleSearchChange}
+                className="border-2 border-gray-300 rounded-md self-start text-xl self-center pl-2"
+                placeholder="Search"
+              />
+              <div id="search" className="flex-col text-xl overflow-y-scroll m-4" style={{maxHeight: "80vh"}}>
+                {searchedVideos.map((video) => {
+                  return (
+                    <div
+                      className="flex flex-col"
+                      key={video.id}
+                      onMouseEnter={() => setHoveredSearchedVideo(video.id)}
+                      onMouseLeave={() => setHoveredSearchedVideo(null)}
+                      onMouseDown={() => setQueuedVideos([...queuedVideos, {
+                        url: video.url,
+                        thumbnail: video.thumbnail,
+                        title: video.title,
+                        id: video.id,
+                        added_by: name
+                      }])}
+                    >
+                      <img src={video.thumbnail} alt={video.title} />
+                      <span className={hoveredSearchedVideo === video.id ? "" : "truncate"}>
+                        {`${video.title}`}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         :
           <>
